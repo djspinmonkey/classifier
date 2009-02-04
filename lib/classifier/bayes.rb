@@ -15,24 +15,26 @@ class Bayes
 	end
 
 	#
-	# Provides a general training method for all categories specified in Bayes#new
+  # Provides a general training method for all categories specified in
+  # Bayes#new.  Optionally allows you to weight the input with a given score.
 	# For example:
 	#     b = Classifier::Bayes.new 'This', 'That', 'the_other'
 	#     b.train :this, "This text"
 	#     b.train "that", "That text"
 	#     b.train "The other", "The other text"
-	def train(category, text)
+  #     b.train :some_more, "this is less important", .75
+	def train(category, text, weight = 1)
 		category = category.prepare_category_name
 		text.word_hash.each do |word, count|
-			@categories[category][word]     ||=     0
-			@categories[category][word]      +=     count
-			@total_words += count
+			@categories[category][word] ||= 0
+			@categories[category][word]  += (count * weight)
+			@total_words += (count * weight)
 		end
 	end
 
 	#
 	# Provides a untraining method for all categories specified in Bayes#new
-	# Be very careful with this method.
+	# Be very careful with this method, especially if using weights.
 	#
 	# For example:
 	#     b = Classifier::Bayes.new 'This', 'That', 'the_other'

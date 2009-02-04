@@ -30,4 +30,10 @@ class BayesianTest < Test::Unit::TestCase
 		@classifier.train_uninteresting "here are some bad words, I hate you"
 		assert_equal 'Uninteresting', @classifier.classify("I hate bad words and you")
 	end
+
+  def test_weighted_classification
+    3.times { @classifier.train(:Interesting, "These words are only sligtly ok", 0.25) }
+    @classifier.train(:Uninteresting, "But these ones are totally bad.")
+		assert_equal 'Uninteresting', @classifier.classify("Now we have bad and ok.")
+  end
 end
