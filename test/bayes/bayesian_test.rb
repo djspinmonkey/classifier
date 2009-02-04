@@ -29,18 +29,11 @@ class BayesianTest < Test::Unit::TestCase
 		@classifier.train_interesting "here are some good words. I hope you love them"
 		@classifier.train_uninteresting "here are some bad words, I hate you"
 		assert_equal 'Uninteresting', @classifier.classify("I hate bad words and you")
-  end
-
-  def test_classification_with_different_numbers_of_matching_words
-		@classifier.train_interesting "good wonderful awesome fantastic"
-		@classifier.train_uninteresting "bad terrible horrible rotten"
-		assert_equal 'Interesting', @classifier.classify("good wonderful awesome bad")
-  end
+	end
 
   def test_weighted_classification
-		@classifier.train(:Interesting, "This sentence has five words")
-		@classifier.train(:Interesting, "ok" , 0.25)
-		@classifier.train(:Uninteresting, "Six words here, which includes bad.")
-		assert_equal 'Uninteresting', @classifier.classify("This is more bad than ok, ok?")
+    3.times { @classifier.train(:Interesting, "These words are only sligtly ok", 0.25) }
+    @classifier.train(:Uninteresting, "But these ones are totally bad.")
+		assert_equal 'Uninteresting', @classifier.classify("Now we have bad and ok.")
   end
 end
