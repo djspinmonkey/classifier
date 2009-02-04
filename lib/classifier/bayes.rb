@@ -5,9 +5,9 @@
 module Classifier
 
 class Bayes
-  # The class can be created with one or more categories, each of which will be
-  # initialized and given a training method. E.g., 
-  #      b = Classifier::Bayes.new 'Interesting', 'Uninteresting', 'Spam'
+	# The class can be created with one or more categories, each of which will be
+	# initialized and given a training method. E.g., 
+	#      b = Classifier::Bayes.new 'Interesting', 'Uninteresting', 'Spam'
 	def initialize(*categories)
 		@categories = Hash.new
 		categories.each { |category| @categories[category.prepare_category_name] = Hash.new }
@@ -15,14 +15,14 @@ class Bayes
 	end
 
 	#
-  # Provides a general training method for all categories specified in
-  # Bayes#new.  Optionally allows you to weight the input with a given score.
+	# Provides a general training method for all categories specified in
+	# Bayes#new.  Optionally allows you to weight the input with a given score.
 	# For example:
 	#     b = Classifier::Bayes.new 'This', 'That', 'the_other'
 	#     b.train :this, "This text"
 	#     b.train "that", "That text"
 	#     b.train "The other", "The other text"
-  #     b.train :some_more, "this is less important", .75
+	#     b.train :some_more, "this is less important", .75
 	def train(category, text, weight = 1)
 		category = category.prepare_category_name
 		text.word_hash.each do |word, count|
@@ -74,11 +74,11 @@ class Bayes
 		return score
 	end
 
-  #
-  # Returns the classification of the provided +text+, which is one of the 
-  # categories given in the initializer. E.g.,
-  #    b.classify "I hate bad words and you"
-  #    =>  'Uninteresting'
+	#
+	# Returns the classification of the provided +text+, which is one of the 
+	# categories given in the initializer. E.g.,
+	#    b.classify "I hate bad words and you"
+	#    =>  'Uninteresting'
 	def classify(text)
 		(classifications(text).sort_by { |a| -a[1] })[0][0]
 	end
