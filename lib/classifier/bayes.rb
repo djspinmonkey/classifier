@@ -15,14 +15,14 @@ class Bayes
 	end
 
 	#
-  # Provides a general training method for all categories specified in
-  # Bayes#new.  Optionally allows you to weight the input with a given score.
+	# Provides a general training method for all categories specified in
+	# Bayes#new.  Optionally allows you to weight the input with a given score.
 	# For example:
 	#     b = Classifier::Bayes.new 'This', 'That', 'the_other'
 	#     b.train :this, "This text"
 	#     b.train "that", "That text"
 	#     b.train "The other", "The other text"
-  #     b.train :some_more, "this is less important", .75
+	#     b.train :some_more, "this is less important", .75
 	def train(category, text, weight = 1)
 		category = category.prepare_category_name
 		text.word_hash.each do |word, count|
@@ -33,25 +33,27 @@ class Bayes
 	end
 
 	#
-	# Provides a untraining method for all categories specified in Bayes#new
+	# Provides a untraining method for all categories specified in Bayes#new 
 	# Be very careful with this method, especially if using weights.
 	#
 	# For example:
 	#     b = Classifier::Bayes.new 'This', 'That', 'the_other'
-	#     b.train :this, "This text"
-	#     b.untrain :this, "This text"
-	def untrain(category, text)
+	#     b.train   :this, "This text"
+	#     b.untrain :this, "This text"      # now "This text" is not trained
+	#     b.train   :this, "This text"
+	#     b.untrain :this, "This tesx", .5  # now "This text" is weighted at .5
+	def untrain(category, text, weight = 1)
 		category = category.prepare_category_name
 		text.word_hash.each do |word, count|
 			if @total_words >= 0
 				orig = @categories[category][word]
-				@categories[category][word]     ||=     0
-				@categories[category][word]      -=     count
+				@categories[category][word] ||= 0
+				@categories[category][word]  -= (count * weight)
 				if @categories[category][word] <= 0
 					@categories[category].delete(word)
 					count = orig
 				end
-				@total_words -= count
+				@total_words -= (count * weight)
 			end
 		end
 	end
@@ -64,21 +66,24 @@ class Bayes
 	def classifications(text)
 		score = Hash.new
 		@categories.each do |category, category_words|
-			score[category.to_s] = 0
-			total = category_words.values.inject(0) {|sum, element| sum+element}
+			text_score = text_word_count = 0
+			category_total = category_words.values.inject(0) {|sum, element| sum+element}
 			text.word_hash.each do |word, count|
+				text_word_count += 1
 				s = category_words.has_key?(word) ? category_words[word] : 0.1
-				score[category.to_s] += Math.log(s/total.to_f)
+				text_score += Math.log(s/category_total.to_f)
 			end
+			score[category.to_s] = text_score / text_word_count  # take the mean score of the words in the text
+
 		end
 		return score
 	end
 
-  #
-  # Returns the classification of the provided +text+, which is one of the 
-  # categories given in the initializer. E.g.,
-  #    b.classify "I hate bad words and you"
-  #    =>  'Uninteresting'
+	#
+	# Returns the classification of the provided +text+, which is one of the 
+	# categories given in the initializer. E.g.,
+	#    b.classify "I hate bad words and you"
+	#    =>  'Uninteresting'
 	def classify(text)
 		(classifications(text).sort_by { |a| -a[1] })[0][0]
 	end
